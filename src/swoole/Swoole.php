@@ -42,7 +42,7 @@ final class Swoole
                 }
 
                 break;
-            case SwooleTable::distributeLockTableName():
+            case SwooleTable::redisLockTableName():
                 $columns = [
                     ['contents', SwooleTable::COLUMN_TYPE_STRING, 16]
                 ];
@@ -63,6 +63,21 @@ final class Swoole
 
                 try {
                     $server->$tableName = SwooleTable::buildTable($columns, 2048);
+                } catch (Throwable $ex) {
+                }
+
+                break;
+            case SwooleTable::wsTableName():
+                $columns = [
+                    ['id', SwooleTable::COLUMN_TYPE_STRING, 16],
+                    ['source', SwooleTable::COLUMN_TYPE_STRING, 16],
+                    ['jwtClaims', SwooleTable::COLUMN_TYPE_STRING, 1024],
+                    ['lastPongAt', SwooleTable::COLUMN_TYPE_STRING, 16],
+                    ['createAt', SwooleTable::COLUMN_TYPE_STRING, 16]
+                ];
+
+                try {
+                    $server->$tableName = SwooleTable::buildTable($columns, 40960);
                 } catch (Throwable $ex) {
                 }
 

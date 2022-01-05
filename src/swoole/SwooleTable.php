@@ -16,12 +16,17 @@ final class SwooleTable
     /**
      * @var string
      */
-    private static $_distributedLockTableName = 'tblDistributeLock';
+    private static $_redisLockTableName = 'tblRedisLock';
 
     /**
      * @var string
      */
     private static $_ratelimiterTableName = 'tblRatelimiter';
+
+    /**
+     * @var string
+     */
+    private static $_wsTableName = 'tblWsConnections';
 
     private function __construct()
     {
@@ -37,14 +42,14 @@ final class SwooleTable
         return self::$_cacheTableName;
     }
 
-    public static function distributeLockTableName(?string $name = null): string
+    public static function redisLockTableName(?string $name = null): string
     {
         if (is_string($name) && $name !== '') {
-            self::$_distributedLockTableName = $name;
+            self::$_redisLockTableName = $name;
             return '';
         }
 
-        return self::$_distributedLockTableName;
+        return self::$_redisLockTableName;
     }
 
     public static function ratelimiterTableName(?string $name = null): string
@@ -55,6 +60,16 @@ final class SwooleTable
         }
 
         return self::$_ratelimiterTableName;
+    }
+
+    public static function wsTableName(?string $name = null): string
+    {
+        if (is_string($name) && $name !== '') {
+            self::$_wsTableName = $name;
+            return '';
+        }
+
+        return self::$_wsTableName;
     }
 
     /** @noinspection PhpFullyQualifiedNameUsageInspection

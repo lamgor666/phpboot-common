@@ -2,7 +2,7 @@
 
 namespace phpboot\common\constant;
 
-final class RequestParamSecurityMode
+final class ReqParamSecurityMode
 {
     const NONE = 0;
     const HTML_PURIFY = 1;

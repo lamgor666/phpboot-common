@@ -4,7 +4,7 @@ namespace phpboot\common\util;
 
 use phpboot\common\Cast;
 use phpboot\common\constant\Regexp;
-use phpboot\common\constant\RequestParamSecurityMode as SecurityMode;
+use phpboot\common\constant\ReqParamSecurityMode as SecurityMode;
 use phpboot\common\HtmlPurifier;
 use Throwable;
 
@@ -310,20 +310,20 @@ final class ArrayUtils
                 $rule = StringUtils::substringAfter($rule, ':');
             }
 
-            $paramName = '';
+            $s1 = '';
             
             switch ($type) {
                 case 1:
                     if (StringUtils::endsWith($rule, ':0')) {
-                        $paramName = StringUtils::substringBeforeLast($rule, ':');
+                        $s1 = StringUtils::substringBeforeLast($rule, ':');
                         $securityMode = SecurityMode::NONE;
                     } else if (StringUtils::endsWith($rule, ':1')) {
-                        $paramName = StringUtils::substringBeforeLast($rule, ':');
+                        $s1 = StringUtils::substringBeforeLast($rule, ':');
                         $securityMode = SecurityMode::HTML_PURIFY;
                     } else if (StringUtils::endsWith($rule, ':2')) {
-                        $paramName = StringUtils::substringBeforeLast($rule, ':');
+                        $s1 = StringUtils::substringBeforeLast($rule, ':');
                     } else {
-                        $paramName = $rule;
+                        $s1 = $rule;
                     }
 
                     break;
@@ -331,9 +331,9 @@ final class ArrayUtils
                     if (strpos($rule, ':') !== false) {
                         $defaultValue = StringUtils::substringAfterLast($rule, ':');
                         $defaultValue = StringUtils::isInt($defaultValue) ? (int) $defaultValue : PHP_INT_MIN;
-                        $paramName = StringUtils::substringBeforeLast($rule, ':');
+                        $s1 = StringUtils::substringBeforeLast($rule, ':');
                     } else {
-                        $paramName = $rule;
+                        $s1 = $rule;
                     }
 
                     $defaultValue = is_int($defaultValue) ? $defaultValue : PHP_INT_MIN;
@@ -342,37 +342,45 @@ final class ArrayUtils
                     if (strpos($rule, ':') !== false) {
                         $defaultValue = StringUtils::substringAfterLast($rule, ':');
                         $defaultValue = StringUtils::isFloat($defaultValue) ? bcadd($defaultValue, 0, 2) : null;
-                        $paramName = StringUtils::substringBeforeLast($rule, ':');
+                        $s1 = StringUtils::substringBeforeLast($rule, ':');
                     } else {
-                        $paramName = $rule;
+                        $s1 = $rule;
                     }
 
                     $defaultValue = is_string($defaultValue) ? $defaultValue : '0.00';
                     break;
             }
 
-            if (empty($paramName)) {
+            if (empty($s1)) {
                 continue;
+            }
+
+            if (strpos($s1, '#') !== false) {
+                $mapKey = StringUtils::substringBefore($s1, '#');
+                $dstKey = StringUtils::substringAfter($s1, '#');
+            } else {
+                $mapKey = $s1;
+                $dstKey = $s1;
             }
 
             switch ($type) {
                 case 2:
-                    $value = Cast::toInt($arr[$paramName], is_int($defaultValue) ? $defaultValue : PHP_INT_MIN);
+                    $value = Cast::toInt($arr[$mapKey], is_int($defaultValue) ? $defaultValue : PHP_INT_MIN);
                     break;
                 case 3:
-                    $value = Cast::toString($arr[$paramName]);
+                    $value = Cast::toString($arr[$mapKey]);
                     $value = StringUtils::isFloat($value) ? bcadd($value, 0, 2) : $defaultValue;
                     break;
                 case 4:
-                    $value = json_decode(Cast::toString($arr[$paramName]), true);
+                    $value = json_decode(Cast::toString($arr[$mapKey]), true);
                     $value = is_array($value) ? $value : [];
                     break;
                 default:
-                    $value = self::getStringWithSecurityMode($arr, $paramName, $securityMode);
+                    $value = self::getStringWithSecurityMode($arr, $mapKey, $securityMode);
                     break;
             }
 
-            $map1[$paramName] = $value;
+            $map1[$dstKey] = $value;
         }
 
         return $map1;
